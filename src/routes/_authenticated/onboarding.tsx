@@ -65,7 +65,7 @@ function Onboarding() {
   }
 
   return (
-    <AuthShell title={STEPS[step]} subtitle={`Step ${step + 1} of ${STEPS.length}`}>
+    <AuthShell title={STEPS[step] ?? ""} subtitle={`Step ${step + 1} of ${STEPS.length}`}>
       <Progress value={((step + 1) / STEPS.length) * 100} className="mb-6" />
       <div className="space-y-5">
         {step === 0 && (<>
