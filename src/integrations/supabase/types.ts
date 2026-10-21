@@ -14,7 +14,185 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          completed: boolean
+          created_at: string
+          description: string | null
+          ends_at: string
+          id: string
+          kind: string
+          starts_at: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          description?: string | null
+          ends_at: string
+          id?: string
+          kind?: string
+          starts_at: string
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          kind?: string
+          starts_at?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      focus_sessions: {
+        Row: {
+          actual_seconds: number
+          created_at: string
+          ended_at: string
+          id: string
+          label: string | null
+          planned_minutes: number
+          started_at: string
+          status: string
+          task_id: string | null
+          user_id: string
+        }
+        Insert: {
+          actual_seconds: number
+          created_at?: string
+          ended_at: string
+          id?: string
+          label?: string | null
+          planned_minutes: number
+          started_at: string
+          status?: string
+          task_id?: string | null
+          user_id?: string
+        }
+        Update: {
+          actual_seconds?: number
+          created_at?: string
+          ended_at?: string
+          id?: string
+          label?: string | null
+          planned_minutes?: number
+          started_at?: string
+          status?: string
+          task_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "focus_sessions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          experience_level: string | null
+          explanation_style: string | null
+          goals: string | null
+          id: string
+          main_objective: string | null
+          onboarding_completed: boolean
+          onboarding_step: number
+          study_days: string[]
+          study_hours: string | null
+          target_date: string | null
+          timezone: string
+          updated_at: string
+          weekly_target_minutes: number
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          experience_level?: string | null
+          explanation_style?: string | null
+          goals?: string | null
+          id: string
+          main_objective?: string | null
+          onboarding_completed?: boolean
+          onboarding_step?: number
+          study_days?: string[]
+          study_hours?: string | null
+          target_date?: string | null
+          timezone?: string
+          updated_at?: string
+          weekly_target_minutes?: number
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          experience_level?: string | null
+          explanation_style?: string | null
+          goals?: string | null
+          id?: string
+          main_objective?: string | null
+          onboarding_completed?: boolean
+          onboarding_step?: number
+          study_days?: string[]
+          study_hours?: string | null
+          target_date?: string | null
+          timezone?: string
+          updated_at?: string
+          weekly_target_minutes?: number
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          completed: boolean
+          created_at: string
+          due_date: string | null
+          id: string
+          notes: string | null
+          priority: string
+          tag: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string
+          tag?: string | null
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          priority?: string
+          tag?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
