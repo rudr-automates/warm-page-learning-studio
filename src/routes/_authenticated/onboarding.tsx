@@ -59,7 +59,7 @@ function Onboarding() {
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       onboarding_step: next, ...(done ? { onboarding_completed: true } : {}),
     });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     if (done) navigate({ to: "/dashboard" });
     else setStep(next);
   }

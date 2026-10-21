@@ -50,9 +50,9 @@ export function CalendarPanel() {
     const f = new FormData(e.currentTarget);
     const start = new Date(`${selected}T${f.get("start")}`);
     const end = new Date(`${selected}T${f.get("end")}`);
-    if (end <= start) return toast.error("End time must be after start.");
+    if (end <= start) { toast.error("End time must be after start."); return; }
     const { error } = await supabase.from("events").insert({ title: String(f.get("title")), description: String(f.get("description") || "") || null, starts_at: start.toISOString(), ends_at: end.toISOString() });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     setOpen(false); refresh();
   }
 

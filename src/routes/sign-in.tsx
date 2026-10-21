@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { safeRedirect } from "@/lib/use-user";
 
 export const Route = createFileRoute("/sign-in")({
-  validateSearch: (s: Record<string, unknown>) => ({ redirect: typeof s.redirect === "string" ? s.redirect : undefined }),
+  validateSearch: (s: Record<string, unknown>): { redirect?: string } => ({ redirect: typeof s["redirect"] === "string" ? (s["redirect"] as string) : undefined }),
   head: () => ({ meta: [{ title: "Sign in — Horizon 2.0" }, { name: "description", content: "Sign in to your Horizon learning workspace." }, { property: "og:title", content: "Sign in — Horizon 2.0" }, { property: "og:description", content: "Sign in to your Horizon learning workspace." }] }),
   component: SignIn,
 });
@@ -25,7 +25,7 @@ function SignIn() {
     setBusy(true);
     const { error } = await supabase.auth.signInWithPassword({ email: String(f.get("email")), password: String(f.get("password")) });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     navigate({ to: safeRedirect(redirect) });
   }
   return (

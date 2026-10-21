@@ -21,7 +21,7 @@ function SignUp() {
     if (busy) return;
     const f = new FormData(e.currentTarget);
     const password = String(f.get("password"));
-    if (password.length < 8 || !/\d/.test(password) || !/[A-Za-z]/.test(password)) return toast.error("Use at least 8 characters with letters and a number.");
+    if (password.length < 8 || !/\d/.test(password) || !/[A-Za-z]/.test(password)) { toast.error("Use at least 8 characters with letters and a number."); return; }
     setBusy(true);
     const email = String(f.get("email"));
     const { data, error } = await supabase.auth.signUp({
@@ -29,7 +29,7 @@ function SignUp() {
       options: { emailRedirectTo: `${window.location.origin}/dashboard`, data: { display_name: String(f.get("name")) } },
     });
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     if (data.session) window.location.assign("/onboarding");
     else setSent(email);
   }
