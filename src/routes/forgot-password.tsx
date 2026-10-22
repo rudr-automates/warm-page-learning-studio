@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Reset password — Horizon 2.0" }, { name: "description", content: "Get a link to reset your Horizon password." }, { property: "og:title", content: "Reset password — Horizon 2.0" }, { property: "og:description", content: "Get a link to reset your Horizon password." }] }),
+  head: () => ({ meta: [{ title: "Reset password — Horizon 2.0" }, { name: "description", content: "Get a link to reset your Horizon password." }, { property: "og:title", content: "Reset password — Horizon 2.0" }, { property: "og:description", content: "Get a link to reset your Horizon password." }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }),
   component: Forgot,
 });
 

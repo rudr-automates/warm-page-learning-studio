@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
-  head: () => ({ meta: [{ title: "Set up your workspace — Horizon 2.0" }, { name: "description", content: "Tell Horizon how you like to learn." }, { property: "og:title", content: "Set up — Horizon 2.0" }, { property: "og:description", content: "Tell Horizon how you like to learn." }] }),
+  head: () => ({ meta: [{ title: "Set up your workspace — Horizon 2.0" }, { name: "description", content: "Tell Horizon how you like to learn." }, { property: "og:title", content: "Set up — Horizon 2.0" }, { property: "og:description", content: "Tell Horizon how you like to learn." }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }),
   component: Onboarding,
 });
 
@@ -54,8 +54,9 @@ function Onboarding() {
   const set = <K extends keyof P>(k: K, v: P[K]) => setP({ ...p, [k]: v });
 
   async function save(next: number, done = false) {
+    if (!p) return;
     const { error } = await supabase.from("profiles").upsert({
-      id: user.id, ...p!, target_date: p!.target_date || null,
+      id: user.id, ...p, target_date: p.target_date || null,
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       onboarding_step: next, ...(done ? { onboarding_completed: true } : {}),
     });

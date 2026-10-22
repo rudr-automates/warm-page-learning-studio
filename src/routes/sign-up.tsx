@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/sign-up")({
-  head: () => ({ meta: [{ title: "Create your account — Horizon 2.0" }, { name: "description", content: "Create a free Horizon learning workspace." }, { property: "og:title", content: "Create your account — Horizon 2.0" }, { property: "og:description", content: "Create a free Horizon learning workspace." }] }),
+  head: () => ({ meta: [{ title: "Create your account — Horizon 2.0" }, { name: "description", content: "Create a free Horizon learning workspace." }, { property: "og:title", content: "Create your account — Horizon 2.0" }, { property: "og:description", content: "Create a free Horizon learning workspace." }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }),
   component: SignUp,
 });
 
