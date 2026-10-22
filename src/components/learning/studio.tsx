@@ -19,13 +19,14 @@ const LessonPlayer=lazy(()=>import('./lesson-player').then(m=>({default:m.Lesson
 export function Studio({lessonId,userId}:{lessonId:string;userId:string}) {
   const {data:lesson}=useSuspenseQuery(lessonQuery(lessonId)),{data:catalog}=useSuspenseQuery(catalogQuery),{data:progress}=useSuspenseQuery(progressQuery(userId));const qc=useQueryClient();
   const saved=progress.find(p=>p.lesson_id===lessonId);const [position,setPosition]=useState(saved?.position_seconds||0),[duration,setDuration]=useState(lesson.duration_seconds),[seek,setSeek]=useState<{time:number;key:number}|null>(null),[saveState,setSaveState]=useState('Saved'),[pending,setPending]=useState(false);
-  const state=useRef({position:saved?.position_seconds||0,watched:saved?.watched_seconds||0,completed:saved?.completed||false,dirty:false});const inFlight=useRef(false),alive=useRef(true);
+  const state=useRef({position:saved?.position_seconds||0,watched:saved?.watched_seconds||0,completed:saved?.completed||false,dirty:false});const inFlight=useRef<Promise<void>|null>(null),alive=useRef(true);
   const lessons=lesson.course_id?catalog.lessons.filter(l=>l.course_id===lesson.course_id):[lesson];const index=lessons.findIndex(l=>l.id===lesson.id),next=lessons[index+1];const course=catalog.courses.find(c=>c.id===lesson.course_id);const pct=courseCompletion(lessons.map(l=>l.id),progress);
   const checkpoint=useCallback(async()=>{
-    if(!state.current.dirty||inFlight.current)return;
-    inFlight.current=true;const snapshot={...state.current};state.current.dirty=false;if(alive.current)setSaveState('Saving…');
-    const {error}=await supabase.from('lesson_progress').upsert({user_id:userId,lesson_id:lessonId,position_seconds:snapshot.position,watched_seconds:snapshot.watched,completed:snapshot.completed},{onConflict:'user_id,lesson_id'});
-    inFlight.current=false;if(error){state.current.dirty=true;if(alive.current)setSaveState('Could not save');}else{if(alive.current)setSaveState('Saved');qc.invalidateQueries({queryKey:['learning','progress',userId]});}
+    if(inFlight.current)await inFlight.current;
+    if(!state.current.dirty)return;
+    const snapshot={...state.current};state.current.dirty=false;if(alive.current)setSaveState('Saving…');
+    const write=async()=>{try{const {error}=await supabase.from('lesson_progress').upsert({user_id:userId,lesson_id:lessonId,position_seconds:snapshot.position,watched_seconds:snapshot.watched,completed:snapshot.completed},{onConflict:'user_id,lesson_id'});if(error)throw error;if(alive.current)setSaveState('Saved');await qc.invalidateQueries({queryKey:['learning','progress',userId]});}catch{state.current.dirty=true;if(alive.current)setSaveState('Could not save');}};
+    inFlight.current=write();await inFlight.current;inFlight.current=null;
   },[lessonId,userId,qc]);
   useEffect(()=>{alive.current=true;const interval=setInterval(()=>void checkpoint(),10000);const hide=()=>{if(document.visibilityState==='hidden')void checkpoint();};document.addEventListener('visibilitychange',hide);return()=>{alive.current=false;clearInterval(interval);document.removeEventListener('visibilitychange',hide);void checkpoint();};},[checkpoint]);
   const onPosition=(time:number,watched:number)=>{state.current.position=time;state.current.watched+=watched;state.current.dirty=true;setPosition(time);};
