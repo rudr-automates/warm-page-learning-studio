@@ -10,7 +10,7 @@ import { safeRedirect } from "@/lib/use-user";
 
 export const Route = createFileRoute("/sign-in")({
   validateSearch: (s: Record<string, unknown>): { redirect?: string | undefined } => ({ redirect: typeof s["redirect"] === "string" ? (s["redirect"] as string) : undefined }),
-  head: () => ({ meta: [{ title: "Sign in — Horizon 2.0" }, { name: "description", content: "Sign in to your Horizon learning workspace." }, { property: "og:title", content: "Sign in — Horizon 2.0" }, { property: "og:description", content: "Sign in to your Horizon learning workspace." }] }),
+  head: () => ({ meta: [{ title: "Sign in — Horizon 2.0" }, { name: "description", content: "Sign in to your Horizon learning workspace." }, { property: "og:title", content: "Sign in — Horizon 2.0" }, { property: "og:description", content: "Sign in to your Horizon learning workspace." }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }),
   component: SignIn,
 });
 

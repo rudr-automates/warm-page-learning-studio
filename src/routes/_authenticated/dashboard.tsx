@@ -1,7 +1,7 @@
 import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { Flame, Clock, Target, LogOut, Settings2, BookOpen } from "lucide-react";
+import { Flame, Clock, LogOut, Settings2, BookOpen, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -10,9 +10,12 @@ import { TasksPanel } from "@/components/dashboard/tasks-panel";
 import { FocusTimer } from "@/components/dashboard/focus-timer";
 import { CalendarPanel, eventsQuery } from "@/components/dashboard/calendar-panel";
 import { computeStreak, dayKey } from "@/lib/streak";
+import { catalogQuery, progressQuery } from '@/lib/learning-queries';
+import { ImportVideo } from '@/components/learning/import-video';
+import { courseCompletion } from '@/lib/learning';
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Horizon 2.0" }, { name: "description", content: "Your learning workspace: tasks, calendar, focus and progress." }, { property: "og:title", content: "Dashboard — Horizon 2.0" }, { property: "og:description", content: "Your learning workspace." }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Horizon 2.0" }, { name: "description", content: "Your learning workspace: tasks, calendar, focus and progress." }, { property: "og:title", content: "Dashboard — Horizon 2.0" }, { property: "og:description", content: "Your learning workspace." }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }),
   beforeLoad: async ({ context }) => {
     const { data } = await supabase.from("profiles").select("*").eq("id", context.user.id).maybeSingle();
     if (!data?.onboarding_completed) throw redirect({ to: "/onboarding" });
@@ -22,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 function Dashboard() {
-  const { profile } = Route.useRouteContext();
+  const { profile, user } = Route.useRouteContext();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const tz = profile.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -33,6 +36,11 @@ function Dashboard() {
     return data;
   } });
   const { data: events = [] } = useQuery(eventsQuery);
+  const { data: catalog } = useQuery(catalogQuery);
+  const { data: learningProgress = [] } = useQuery(progressQuery(user.id));
+  const recentLesson = catalog?.lessons.find(l => l.id === learningProgress.find(p => !p.completed)?.lesson_id) || catalog?.lessons[0];
+  const courseLessons = catalog?.lessons.filter(l => l.course_id === recentLesson?.course_id) || [];
+  const coursePercent = courseCompletion(courseLessons.map(l => l.id), learningProgress);
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -63,6 +71,7 @@ function Dashboard() {
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
           <Logo />
           <div className="flex gap-1">
+            <Button variant="ghost" size="sm" asChild><Link to="/courses"><BookOpen />Courses</Link></Button>
             <Button variant="ghost" size="sm" asChild><Link to="/onboarding"><Settings2 />Preferences</Link></Button>
             <Button variant="ghost" size="sm" onClick={signOut}><LogOut />Sign out</Button>
           </div>
@@ -76,6 +85,7 @@ function Dashboard() {
             {profile.main_objective && <p className="mt-1 text-muted-foreground">Focus: {profile.main_objective}{profile.target_date ? ` · target ${profile.target_date}` : ""}</p>}
           </div>
           <div className="flex flex-wrap gap-2">
+            <ImportVideo userId={user.id} />
             <Button variant="outline" size="sm" asChild><a href="#focus">Start focus session</a></Button>
             <Button variant="outline" size="sm" asChild><a href="#tasks">Create task</a></Button>
             <Button variant="outline" size="sm" asChild><a href="#calendar">Plan study session</a></Button>
@@ -119,11 +129,11 @@ function Dashboard() {
                 {sessions.slice(0, 5).map((s) => <li key={s.id} className="flex justify-between gap-2"><span className="truncate">{s.label || "Focus session"}{s.status === "cancelled" ? " (partial)" : ""}</span><span className="shrink-0 text-muted-foreground">{Math.round(s.actual_seconds / 60)} min</span></li>)}
               </ul>
             </section>
-            <section className="paper-card border-dashed p-5">
+            <section className="paper-card p-5">
               <BookOpen className="text-forest" />
-              <h2 className="mt-2 text-xl">Courses & Learning Studio</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Course library, video lessons and your AI tutor are coming in the next phase.</p>
-              <Target className="mt-3 size-4 text-primary" />
+              <h2 className="mt-2 text-xl">Continue learning</h2>
+              {recentLesson && <><p className="mt-2 text-sm">{recentLesson.title}</p><Progress className="mt-3" value={coursePercent}/><p className="mt-2 text-xs text-muted-foreground">{coursePercent}% course complete</p><Button className="mt-4 w-full" asChild><Link to="/learn/$lessonId" params={{ lessonId: recentLesson.id }}>Open lesson<ArrowRight/></Link></Button></>}
+              <Button className="mt-2 w-full" variant="ghost" asChild><Link to="/library">View your library</Link></Button>
             </section>
           </div>
         </div>
