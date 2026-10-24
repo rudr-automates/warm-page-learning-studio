@@ -1,5 +1,11 @@
 # Welcome to your Lovable project
 
+## Horizon 2.0 prototype status
+
+Foundation and Learning Studio are implemented. Sign in, open **Courses** from the dashboard, and start the original grounded-AI demonstration course. Personal notes, bookmarks and progress use owner-protected Supabase records. Phase 3 will connect external LLM APIs; no Lovable AI Gateway is integrated.
+
+See [Learning Studio setup, sample resources, portability and validation](docs/LEARNING_STUDIO.md). Independent deployments must rehost the sample media and update its pointers and lesson video URLs. Set the existing Supabase environment variables, apply `supabase/migrations` in order, install with `bun install`, and run `bun run dev`. Test with `bun run test`. Signed-in flows remain manually unverified with the externally managed Supabase connection.
+
 This project was built with [Lovable](https://lovable.dev).
 
 ## Build with Lovable
