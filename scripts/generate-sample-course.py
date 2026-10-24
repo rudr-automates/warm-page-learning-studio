@@ -56,6 +56,7 @@ for slug, title, sections in LESSONS:
   subprocess.run(['ffmpeg','-v','error','-y','-loop','1','-i',str(png),'-i',str(wav),'-vf',"zoompan=z='min(zoom+0.00002,1.015)':d=1:s=1280x720:fps=25",'-af','apad','-t',str(duration),'-c:v','libx264','-preset','ultrafast','-crf','25','-pix_fmt','yuv420p','-c:a','aac',str(part)],check=True)
  listing = OUT / f'{slug}-concat.txt'; listing.write_text('\n'.join(f"file '{p}'" for p in parts))
  subprocess.run(['ffmpeg','-v','error','-y','-f','concat','-safe','0','-i',str(listing),'-c','copy','-movflags','+faststart',str(OUT/f'{slug}.mp4')],check=True)
+ subprocess.run(['ffmpeg','-v','error','-y','-i',str(OUT/f'{slug}.mp4'),'-c:v','libvpx','-deadline','realtime','-cpu-used','8','-b:v','600k','-c:a','libopus',str(OUT/f'{slug}.webm')],check=True)
  metadata.append({'slug':slug,'title':title,'duration_seconds':round(cursor,2),'transcript':transcript})
  (OUT/f'{slug}.vtt').write_text('WEBVTT\n\n'+'\n\n'.join(f"{int(s['start']//3600):02}:{int(s['start']//60)%60:02}:{s['start']%60:06.3f} --> {int(s['end']//3600):02}:{int(s['end']//60)%60:02}:{s['end']%60:06.3f}\n{s['text']}" for s in transcript))
 (OUT/'lessons.json').write_text(json.dumps(metadata,indent=2))
