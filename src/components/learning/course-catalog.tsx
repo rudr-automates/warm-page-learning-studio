@@ -6,12 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { WorkspaceHeader } from './workspace-header';
-import { catalogQuery, progressQuery } from '@/lib/learning-queries';
+import { catalogQuery, progressQuery, resourcesQuery } from '@/lib/learning-queries';
+import { resolveStorageUrl } from '@/lib/upload';
+import { toast } from 'sonner';
+import { FileText, Download } from 'lucide-react';
 import { courseCompletion, formatPosition } from '@/lib/learning';
 import cover from '@/assets/embeddings.jpg.asset.json';
 
 export function CourseCatalog({ userId, library = false }: { userId: string; library?: boolean }) {
-  const { data: catalog } = useSuspenseQuery(catalogQuery); const { data: progress } = useSuspenseQuery(progressQuery(userId));
+  const { data: catalog } = useSuspenseQuery(catalogQuery); const { data: progress } = useSuspenseQuery(progressQuery(userId)); const { data: documents } = useSuspenseQuery(resourcesQuery(userId));
+  async function download(path: string | null, title: string) {
+    if (!path) return;
+    try { window.open(await resolveStorageUrl(`storage:learning-resources/${path}`), '_blank', 'noreferrer'); }
+    catch { toast.error(`Could not open "${title}".`); }
+  }
   const [search,setSearch]=useState(''), [filter,setFilter]=useState('all');
   const matching = (text:string)=>text.toLowerCase().includes(search.toLowerCase());
   const imports=catalog.lessons.filter(l=>!l.is_demo && matching(l.title));
