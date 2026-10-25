@@ -6,12 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { WorkspaceHeader } from './workspace-header';
-import { catalogQuery, progressQuery } from '@/lib/learning-queries';
+import { catalogQuery, progressQuery, resourcesQuery } from '@/lib/learning-queries';
+import { resolveStorageUrl } from '@/lib/upload';
+import { toast } from 'sonner';
+import { FileText, Download } from 'lucide-react';
 import { courseCompletion, formatPosition } from '@/lib/learning';
 import cover from '@/assets/embeddings.jpg.asset.json';
 
 export function CourseCatalog({ userId, library = false }: { userId: string; library?: boolean }) {
-  const { data: catalog } = useSuspenseQuery(catalogQuery); const { data: progress } = useSuspenseQuery(progressQuery(userId));
+  const { data: catalog } = useSuspenseQuery(catalogQuery); const { data: progress } = useSuspenseQuery(progressQuery(userId)); const { data: documents } = useSuspenseQuery(resourcesQuery(userId));
+  async function download(path: string | null, title: string) {
+    if (!path) return;
+    try { window.open(await resolveStorageUrl(`storage:learning-resources/${path}`), '_blank', 'noreferrer'); }
+    catch { toast.error(`Could not open "${title}".`); }
+  }
   const [search,setSearch]=useState(''), [filter,setFilter]=useState('all');
   const matching = (text:string)=>text.toLowerCase().includes(search.toLowerCase());
   const imports=catalog.lessons.filter(l=>!l.is_demo && matching(l.title));
@@ -20,5 +28,5 @@ export function CourseCatalog({ userId, library = false }: { userId: string; lib
     if (filter==='completed' && pct!==100 || filter==='in-progress' && (pct===100 || !progress.some(p=>lessons.some(l=>l.id===p.lesson_id)))) return null;
     const recent=progress.find(p=>lessons.some(l=>l.id===p.lesson_id) && !p.completed); const next=lessons.find(l=>l.id===recent?.lesson_id) || lessons.find(l=>!progress.some(p=>p.lesson_id===l.id&&p.completed)) || lessons[0];
     return <article className="overflow-hidden rounded-lg border bg-paper" key={c.id}><Link to="/courses/$courseId" params={{courseId:c.id}}><img src={cover.url} alt="Original lesson: what is an embedding?" className="aspect-video w-full object-cover"/></Link><div className="p-5"><div className="flex justify-between text-xs"><span className="text-primary">{c.category}</span><span className="text-muted-foreground">Demonstration course</span></div><h2 className="mt-3 text-2xl"><Link to="/courses/$courseId" params={{courseId:c.id}}>{c.title}</Link></h2><p className="mt-3 text-sm text-muted-foreground">{lessons.length} lessons · {formatPosition(lessons.reduce((n,l)=>n+l.duration_seconds,0))} total</p><Progress value={pct} className="mt-5"/><div className="mt-2 flex justify-between text-xs text-muted-foreground"><span>{pct}% complete</span><span>{progress.filter(p=>p.completed&&lessons.some(l=>l.id===p.lesson_id)).length}/{lessons.length} lessons</span></div><div className="mt-5 flex justify-between gap-2"><Button variant="ghost" asChild><Link to="/courses/$courseId" params={{courseId:c.id}}>Course details<ArrowUpRight/></Link></Button>{next&&<Button asChild><Link to="/learn/$lessonId" params={{lessonId:next.id}}>{pct===100?<CheckCircle2/>:<Play/>}{recent?'Continue':'Start learning'}</Link></Button>}</div></div></article>;
-  })}{imports.filter(l=>{const p=progress.find(p=>p.lesson_id===l.id);return filter==='all'||(filter==='completed'?p?.completed:p&&!p.completed);}).map(l=><article key={l.id} className="rounded-lg border bg-paper p-6"><Film className="size-8 text-forest"/><p className="mt-4 text-xs text-muted-foreground">Your imported video · {l.provider}</p><h2 className="mt-2 break-words text-2xl">{l.title}</h2><p className="mt-3 text-sm text-muted-foreground">Transcript {l.transcript_status}</p><Button className="mt-6" asChild><Link to="/learn/$lessonId" params={{lessonId:l.id}}>Open lesson<ArrowUpRight/></Link></Button></article>)}</div>{!catalog.courses.some(c=>matching(c.title))&&!imports.length&&<p className="py-12 text-center text-muted-foreground">No matching courses or lessons.</p>}</main></div>;
+  })}{imports.filter(l=>{const p=progress.find(p=>p.lesson_id===l.id);return filter==='all'||(filter==='completed'?p?.completed:p&&!p.completed);}).map(l=><article key={l.id} className="rounded-lg border bg-paper p-6"><Film className="size-8 text-forest"/><p className="mt-4 text-xs text-muted-foreground">Your imported video · {l.provider}</p><h2 className="mt-2 break-words text-2xl">{l.title}</h2><p className="mt-3 text-sm text-muted-foreground">Transcript {l.transcript_status}</p><Button className="mt-6" asChild><Link to="/learn/$lessonId" params={{lessonId:l.id}}>Open lesson<ArrowUpRight/></Link></Button></article>)}</div>{!catalog.courses.some(c=>matching(c.title))&&!imports.length&&<p className="py-12 text-center text-muted-foreground">No matching courses or lessons.</p>}{library&&documents.length>0&&<section className="mt-12"><h2 className="text-2xl">Your documents</h2><ul className="mt-4 divide-y rounded-lg border bg-paper">{documents.filter(d=>matching(d.title)).map(d=><li key={d.id} className="flex items-center gap-3 px-5 py-4"><FileText className="size-5 shrink-0 text-forest"/><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{d.title}</p><p className="mt-1 text-xs text-muted-foreground">Uploaded {new Date(d.created_at).toLocaleDateString()}</p></div><Button size="icon" variant="ghost" title={`Open ${d.title}`} aria-label={`Open ${d.title}`} onClick={()=>download(d.source_url,d.title)}><Download/></Button></li>)}</ul></section>}</main></div>;
 }
