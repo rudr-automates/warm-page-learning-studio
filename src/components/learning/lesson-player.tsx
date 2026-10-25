@@ -2,6 +2,7 @@ import ReactPlayer from 'react-player';
 import { useEffect, useRef, useState } from 'react';
 import type { Lesson } from '@/lib/learning-queries';
 import { clampPosition, watchedDelta } from '@/lib/learning';
+import { isStorageUrl, resolveStorageUrl } from '@/lib/upload';
 
 export function LessonPlayer({ lesson, initialPosition, seek, onPosition, onCheckpoint, onDuration }: {
   lesson: Lesson; initialPosition: number; seek: { time: number; key: number } | null;
@@ -11,6 +12,16 @@ export function LessonPlayer({ lesson, initialPosition, seek, onPosition, onChec
   const previous = useRef({ position: initialPosition, wall: performance.now() });
   const ready = useRef(false), playing = useRef(false), seeking = useRef(false);
   const [failed, setFailed] = useState(false);
+  const [src, setSrc] = useState<string | null>(isStorageUrl(lesson.video_url) ? null : lesson.video_url);
+  useEffect(() => {
+    let cancelled = false;
+    setFailed(false);
+    if (isStorageUrl(lesson.video_url)) {
+      setSrc(null);
+      resolveStorageUrl(lesson.video_url).then(url => { if (!cancelled) setSrc(url); }).catch(() => { if (!cancelled) setFailed(true); });
+    } else setSrc(lesson.video_url);
+    return () => { cancelled = true; };
+  }, [lesson.video_url]);
   useEffect(() => { if (seek && ref.current) ref.current.currentTime = clampPosition(seek.time, ref.current.duration || lesson.duration_seconds); }, [seek, lesson.duration_seconds]);
   function load() {
     const p = ref.current; if (!p) return;

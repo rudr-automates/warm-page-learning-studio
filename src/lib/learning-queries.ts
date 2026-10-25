@@ -20,6 +20,11 @@ export const lessonQuery = (id: string) => queryOptions({ queryKey: ['learning',
   if (!data) throw new Error('This lesson is unavailable or you do not have access.');
   return data;
 } });
+export const resourcesQuery = (userId: string) => queryOptions({ queryKey: ['learning', 'resources', userId], queryFn: async () => {
+  const { data, error } = await supabase.from('learning_resources').select('*').eq('owner_id', userId).eq('is_demo', false).order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+} });
 export const annotationsQuery = (id: string, userId: string) => queryOptions({ queryKey: ['learning', 'annotations', userId, id], queryFn: async () => {
   const [notes, bookmarks] = await Promise.all([supabase.from('lesson_notes').select('*').eq('user_id', userId).eq('lesson_id', id).order('timestamp_seconds'), supabase.from('lesson_bookmarks').select('*').eq('user_id', userId).eq('lesson_id', id).order('timestamp_seconds')]);
   if (notes.error) throw notes.error;
