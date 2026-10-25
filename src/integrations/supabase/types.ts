@@ -133,6 +133,72 @@ export type Database = {
           },
         ]
       }
+      learning_resources: {
+        Row: {
+          content_hash: string | null
+          course_id: string | null
+          created_at: string
+          id: string
+          is_demo: boolean
+          kind: string
+          lesson_id: string | null
+          metadata: Json
+          owner_id: string | null
+          processing_error: string | null
+          source_url: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_hash?: string | null
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          is_demo?: boolean
+          kind: string
+          lesson_id?: string | null
+          metadata?: Json
+          owner_id?: string | null
+          processing_error?: string | null
+          source_url?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_hash?: string | null
+          course_id?: string | null
+          created_at?: string
+          id?: string
+          is_demo?: boolean
+          kind?: string
+          lesson_id?: string | null
+          metadata?: Json
+          owner_id?: string | null
+          processing_error?: string | null
+          source_url?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_resources_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_resources_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_bookmarks: {
         Row: {
           created_at: string
@@ -363,6 +429,139 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_attempts: {
+        Row: {
+          answers: Json
+          completed_at: string | null
+          created_at: string
+          feedback: string | null
+          id: string
+          lesson_id: string
+          mode: string
+          position_seconds: number
+          questions: Json
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          lesson_id: string
+          mode?: string
+          position_seconds?: number
+          questions?: Json
+          score?: number | null
+          user_id?: string
+        }
+        Update: {
+          answers?: Json
+          completed_at?: string | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          lesson_id?: string
+          mode?: string
+          position_seconds?: number
+          questions?: Json
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resource_chunks: {
+        Row: {
+          chunk_index: number
+          content_hash: string | null
+          created_at: string
+          embedding: string | null
+          embedding_dimension: number | null
+          embedding_model: string | null
+          embedding_provider: string | null
+          embedding_space_key: string | null
+          embedding_version: string | null
+          heading: string | null
+          id: string
+          locator_kind: string
+          metadata: Json
+          page_number: number | null
+          resource_id: string
+          section: string | null
+          slide_number: number | null
+          text: string
+          text_search: unknown
+          updated_at: string
+          video_end_seconds: number | null
+          video_start_seconds: number | null
+        }
+        Insert: {
+          chunk_index: number
+          content_hash?: string | null
+          created_at?: string
+          embedding?: string | null
+          embedding_dimension?: number | null
+          embedding_model?: string | null
+          embedding_provider?: string | null
+          embedding_space_key?: string | null
+          embedding_version?: string | null
+          heading?: string | null
+          id?: string
+          locator_kind: string
+          metadata?: Json
+          page_number?: number | null
+          resource_id: string
+          section?: string | null
+          slide_number?: number | null
+          text: string
+          text_search?: unknown
+          updated_at?: string
+          video_end_seconds?: number | null
+          video_start_seconds?: number | null
+        }
+        Update: {
+          chunk_index?: number
+          content_hash?: string | null
+          created_at?: string
+          embedding?: string | null
+          embedding_dimension?: number | null
+          embedding_model?: string | null
+          embedding_provider?: string | null
+          embedding_space_key?: string | null
+          embedding_version?: string | null
+          heading?: string | null
+          id?: string
+          locator_kind?: string
+          metadata?: Json
+          page_number?: number | null
+          resource_id?: string
+          section?: string | null
+          slide_number?: number | null
+          text?: string
+          text_search?: unknown
+          updated_at?: string
+          video_end_seconds?: number | null
+          video_start_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_chunks_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "learning_resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           completed: boolean
@@ -401,6 +600,62 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      tutor_exchanges: {
+        Row: {
+          answer: string
+          citations: Json
+          created_at: string
+          helpful: boolean | null
+          id: string
+          lesson_id: string
+          mode: string
+          model_id: string | null
+          position_seconds: number
+          provider_id: string | null
+          question: string
+          retrieval: string | null
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          citations?: Json
+          created_at?: string
+          helpful?: boolean | null
+          id?: string
+          lesson_id: string
+          mode?: string
+          model_id?: string | null
+          position_seconds: number
+          provider_id?: string | null
+          question: string
+          retrieval?: string | null
+          user_id?: string
+        }
+        Update: {
+          answer?: string
+          citations?: Json
+          created_at?: string
+          helpful?: boolean | null
+          id?: string
+          lesson_id?: string
+          mode?: string
+          model_id?: string | null
+          position_seconds?: number
+          provider_id?: string | null
+          question?: string
+          retrieval?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tutor_exchanges_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
